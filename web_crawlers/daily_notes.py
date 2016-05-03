@@ -1,24 +1,28 @@
-from bs4 import BeautifulSoup
-import urllib2
-import pprint
+import fantasy_baseball_settings
+from web_crawler import WebCrawler 
+from soup_request import SoupRequestHandler
 from datetime import datetime, timedelta
 
-EST = datetime.now()+timedelta(hours=4)
-YYMMDD = EST.strftime("%y%m%d")
-MONTH_AND_DAY = EST.strftime("%b-%d")
+class DailyNotesCrawler(WebCrawler):
 
-class DailyNotes(object):
-    URL = "http://espn.go.com/fantasy/baseball/story/_/page/dailynotes{0}/fantasy-baseball-daily-notes-{1}-mlb-matchups".format(YYMMDD, MONTH_AND_DAY)
+    def __init__(self):
+        self.handler = SoupRequestHandler(self)
+        est = datetime.now()+timedelta(hours=4)
+        yymmdd = est.strftime("%y%m%d")
+        month_and_day = est.strftime("%b-%d")
+
+        self.url = "http://espn.go.com/fantasy/baseball/story/_/page/dailynotes{0}/fantasy-baseball-daily-notes-{1}-mlb-matchups".format(yymmdd, month_and_day)
+
+        self.headers = {
+          'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36',
+        }
     
-    HEADERS = {
-      'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36',
-    }
-    
-    @classmethod
     def parse(self, soup):
         aside = soup.find('aside')
         pitcher_table = aside.find('tbody')
         pitchers = pitcher_table.find_all('tr')
+
+        ret_pitchers = []
 
         for p_row in pitchers:
             index = 1
@@ -38,4 +42,5 @@ class DailyNotes(object):
                     pitcher['WHIP'] = col.text
 
                 index += 1
-            yield pitcher
+            ret_pitchers.append(pitcher)
+        return ret_pitchers

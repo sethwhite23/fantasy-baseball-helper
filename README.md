@@ -1,2 +1,2 @@
 # fantasy-baseball-helper
-Analyze Fantasy Baseball data for ESPN leagues.
+Creates daily report of possible streamers and team player rankings
